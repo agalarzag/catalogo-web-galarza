@@ -1,10 +1,20 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, Phone, ChevronDown } from 'lucide-react';
 import { openQuoteModal } from '../common/QuoteModal';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/catalogo?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsMobileMenuOpen(false);
+    }
+  };
 
   return (
     <header className="w-full font-sans">
@@ -46,16 +56,18 @@ export default function Header() {
         </Link>
 
         {/* Buscador Central (ALINEACIÓN ÓPTICA PERFECTA) */}
-        <div className="hidden lg:flex flex-1 max-w-3xl relative group">
+        <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-3xl relative group">
           <input 
             type="text" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="¿Qué estás buscando hoy? (Ej. Taladro, Cables, Pegamento...)" 
             className="w-full py-3 px-6 pr-14 bg-white border-2 border-primary/20 rounded-full focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium text-secondary shadow-sm placeholder-gray-400 leading-tight"
           />
-          <button className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary-dark text-white w-10 h-10 rounded-full transition-colors flex items-center justify-center">
+          <button type="submit" className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary-dark text-white w-10 h-10 rounded-full transition-colors flex items-center justify-center">
             <Search size={18} />
           </button>
-        </div>
+        </form>
 
         {/* Acciones */}
         <div className="hidden lg:flex items-center gap-4">
@@ -124,14 +136,18 @@ export default function Header() {
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute w-full bg-white z-50 shadow-2xl border-t border-gray-100">
           <div className="p-4 space-y-4">
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative">
               <input 
                 type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar productos..." 
                 className="w-full py-2.5 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
               />
-              <Search size={18} className="absolute left-3 top-3 text-gray-400" />
-            </div>
+              <button type="submit" className="absolute left-3 top-3">
+                <Search size={18} className="text-gray-400" />
+              </button>
+            </form>
             
             <nav className="flex flex-col border-t border-gray-100 pt-2">
               <Link to="/" className="py-3 font-medium text-secondary hover:text-primary border-b border-gray-50">Inicio</Link>
