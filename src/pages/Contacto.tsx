@@ -287,7 +287,7 @@ export default function Contacto() {
             )}
           </article>
 
-          {/* ── RIGHT: Map & Info & FAQ ──── */}
+          {/* ── RIGHT: Map & Info ──── */}
           <div className="flex flex-col gap-8">
             
             {/* Contact Info Card */}
@@ -329,25 +329,32 @@ export default function Contacto() {
               />
             </div>
 
-            {/* Borderless FAQ */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl shadow-gray-200/40 border border-gray-100">
-              <h3 className="font-title font-bold text-secondary text-xl mb-4">
-                Preguntas Frecuentes
-              </h3>
-              <div>
-                {faqs.map((faq, index) => (
-                  <AccordionItem
-                    key={index}
-                    item={faq}
-                    isOpen={openFaq === index}
-                    onToggle={() =>
-                      setOpenFaq(openFaq === index ? null : index)
-                    }
-                  />
-                ))}
-              </div>
-            </div>
+          </div>
+        </div>
 
+        {/* ──── FAQ SECTION (Centered Below Grid) ──── */}
+        <div className="max-w-3xl mx-auto mt-20">
+          <div className="text-center mb-10">
+            <h2 className="font-title font-black text-secondary text-3xl md:text-4xl">
+              Preguntas Frecuentes
+            </h2>
+            <p className="text-text-muted mt-3 font-light text-lg">
+              Resolvemos tus dudas para que compres con total confianza.
+            </p>
+          </div>
+          <div className="bg-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-gray-200/40 border border-gray-100">
+            <div>
+              {faqs.map((faq, index) => (
+                <AccordionItem
+                  key={index}
+                  item={faq}
+                  isOpen={openFaq === index}
+                  onToggle={() =>
+                    setOpenFaq(openFaq === index ? null : index)
+                  }
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
