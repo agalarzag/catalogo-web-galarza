@@ -290,37 +290,39 @@ export default function Contacto() {
           {/* ── RIGHT: Map & Info & FAQ ──── */}
           <div className="flex flex-col gap-8">
             
-            {/* Contact Info List */}
-            <div className="grid grid-cols-2 gap-4">
-              {contactDetails.map((detail) => (
-                <div key={detail.label} className="flex items-center gap-3 group">
-                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm border border-gray-100 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                    <detail.icon size={18} />
-                  </div>
-                  <div>
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                      {detail.label}
-                    </span>
-                    {detail.href ? (
-                      <a href={detail.href} className="text-secondary font-semibold text-sm hover:text-primary transition-colors">
-                        {detail.value}
-                      </a>
-                    ) : (
-                      <span className="text-secondary font-semibold text-sm">
-                        {detail.value}
+            {/* Contact Info Card */}
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+              <div className="flex flex-col gap-6">
+                {contactDetails.map((detail) => (
+                  <div key={detail.label} className="flex items-center gap-4 group">
+                    <div className="w-12 h-12 flex-shrink-0 rounded-xl bg-gray-50 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                      <detail.icon size={20} />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-0.5">
+                        {detail.label}
                       </span>
-                    )}
+                      {detail.href ? (
+                        <a href={detail.href} className="text-secondary font-bold text-base hover:text-primary transition-colors">
+                          {detail.value}
+                        </a>
+                      ) : (
+                        <span className="text-secondary font-bold text-base">
+                          {detail.value}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
             {/* Rounded Map */}
-            <div className="h-64 rounded-2xl overflow-hidden shadow-inner border border-gray-200">
+            <div className="h-64 rounded-2xl overflow-hidden shadow-md border border-gray-100">
               <iframe
                 title="Ubicación de Chamo Import"
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.958!2d-77.027!3d-12.046!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDAyJzQ1LjYiUyA3N8KwMDEnMzcuMiJX!5e0!3m2!1ses!2spe!4v1609459200000!5m2!1ses!2spe"
-                className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-500"
+                className="w-full h-full border-0"
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

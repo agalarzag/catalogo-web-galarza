@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="relative bg-secondary text-white pt-24 pb-8 px-4 md:px-8 font-sans mt-20">
       
       {/* 🚀 INNOVACIÓN: Banner Flotante Pre-Footer (Llamado a la acción) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-5xl bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-2xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-6 border border-white/10">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-5xl bg-gradient-to-r from-primary to-blue-500 rounded-2xl shadow-2xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-6 border border-white/10">
         <div>
           <h2 className="text-2xl md:text-3xl font-title font-bold mb-2">¿Listo para abastecer tu negocio?</h2>
           <p className="text-white/90 font-medium">Accede a precios mayoristas exclusivos y despachos a nivel nacional.</p>
