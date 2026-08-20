@@ -133,7 +133,7 @@ export default function Nosotros() {
       {/* ──── CINEMATIC HERO SECTION ──── */}
       <div 
         className="relative w-full pt-32 pb-40 flex items-center justify-center text-white" 
-        style={{ backgroundImage: "url('/hero-nosotros.jpg')", backgroundSize: "cover", backgroundPosition: "center" }}
+        style={{ backgroundImage: "url('/hero-nosotros.png')", backgroundSize: "cover", backgroundPosition: "center" }}
       >
         {/* Semi-transparent Overlay */}
         <div className="absolute inset-0 bg-secondary/80"></div>
@@ -170,14 +170,14 @@ export default function Nosotros() {
                 ref={ref}
                 className="bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl p-6 text-center shadow-lg hover:-translate-y-2 transition-all duration-300 group"
               >
-                <div className="w-12 h-12 mx-auto rounded-full bg-white/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-all duration-300">
-                  <stat.icon size={22} className="text-white" />
+                <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-all duration-300">
+                  <stat.icon size={22} className="text-primary" />
                 </div>
-                <span className="block text-4xl md:text-5xl font-title font-black text-white tracking-tight">
+                <span className="block text-4xl md:text-5xl font-title font-black text-secondary tracking-tight">
                   {count}
                   <span className="text-accent">{stat.suffix}</span>
                 </span>
-                <span className="block mt-2 text-white/80 text-xs md:text-sm font-semibold uppercase tracking-widest">
+                <span className="block mt-2 text-secondary/80 text-xs md:text-sm font-semibold uppercase tracking-widest">
                   {stat.label}
                 </span>
               </div>

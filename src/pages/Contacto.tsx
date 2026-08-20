@@ -177,14 +177,14 @@ export default function Contacto() {
   return (
     <div className="bg-bg min-h-screen">
       {/* ──── ELEGANT HERO ──── */}
-      <div 
-        className="relative w-full pt-32 pb-40 flex items-center justify-center text-white" 
-        style={{ backgroundImage: "url('/hero-contacto.jpg')", backgroundSize: "cover", backgroundPosition: "center" }}
+      <section 
+        className="relative w-full py-24 flex flex-col items-center justify-center text-center text-white" 
+        style={{ backgroundImage: "url('/hero-contacto.png')", backgroundSize: "cover", backgroundPosition: "center" }}
       >
         <div className="absolute inset-0 bg-secondary/80"></div>
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 h-full flex flex-col justify-center text-center pt-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
           <span className="text-accent font-bold tracking-[0.2em] uppercase text-sm block mb-4">
             Soporte al cliente
           </span>
@@ -195,14 +195,14 @@ export default function Contacto() {
             Estamos listos para resolver tus dudas y potenciar tus proyectos.
           </p>
         </div>
-      </div>
+      </section>
 
       {/* ──── CLEAN MAIN SECTION ──── */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 -mt-24 mb-20">
+      <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           
           {/* ── LEFT: Contact Form Card ──── */}
-          <article className="bg-white text-secondary shadow-2xl rounded-2xl p-8 md:p-10 border border-gray-100">
+          <article className="bg-white text-secondary shadow-xl rounded-2xl p-8 md:p-10 border border-gray-100">
             <h2 className="font-title font-bold text-secondary text-3xl mb-3">
               Envíanos un mensaje
             </h2>
