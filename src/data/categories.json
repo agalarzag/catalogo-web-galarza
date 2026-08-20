@@ -1,0 +1,32 @@
+[
+  {
+    "id": "cat-herramientas",
+    "nombre": "Herramientas",
+    "imagen": "/products/cat-herramientas.jpg"
+  },
+  {
+    "id": "cat-electricos",
+    "nombre": "Eléctricos",
+    "imagen": "/products/cat-electricos.jpg"
+  },
+  {
+    "id": "cat-adhesivos",
+    "nombre": "Adhesivos y Cintas",
+    "imagen": "/products/cat-adhesivos.jpg"
+  },
+  {
+    "id": "cat-iluminacion",
+    "nombre": "Iluminación",
+    "imagen": "/products/cat-iluminacion.jpg"
+  },
+  {
+    "id": "cat-escolar",
+    "nombre": "Campaña Escolar",
+    "imagen": "/products/cat-escolar.jpg"
+  },
+  {
+    "id": "cat-gasfiteria",
+    "nombre": "Gasfitería",
+    "imagen": "/products/cat-gasfiteria.jpg"
+  }
+]
