@@ -2,31 +2,31 @@
   {
     "id": "cat-herramientas",
     "nombre": "Herramientas",
-    "imagen": "/products/cat-herramientas.jpg"
+    "imagen": "/categories/herramientas.jpg"
   },
   {
     "id": "cat-electricos",
     "nombre": "Eléctricos",
-    "imagen": "/products/cat-electricos.jpg"
+    "imagen": "/categories/electricos.jpg"
   },
   {
     "id": "cat-adhesivos",
     "nombre": "Adhesivos y Cintas",
-    "imagen": "/products/cat-adhesivos.jpg"
+    "imagen": "/categories/adhesivos.jpg"
   },
   {
     "id": "cat-iluminacion",
     "nombre": "Iluminación",
-    "imagen": "/products/cat-iluminacion.jpg"
+    "imagen": "/categories/iluminacion.jpg"
   },
   {
     "id": "cat-escolar",
     "nombre": "Campaña Escolar",
-    "imagen": "/products/cat-escolar.jpg"
+    "imagen": "/categories/escolar.jpg"
   },
   {
     "id": "cat-gasfiteria",
     "nombre": "Gasfitería",
-    "imagen": "/products/cat-gasfiteria.jpg"
+    "imagen": "/categories/gasfiteria.jpg"
   }
 ]

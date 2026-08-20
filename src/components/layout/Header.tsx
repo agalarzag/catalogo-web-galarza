@@ -1,19 +1,72 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Menu, X, Phone, ChevronDown } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, Phone, ChevronDown, Package } from 'lucide-react';
 import { openQuoteModal } from '../common/QuoteModal';
+import { getProducts, type Product } from '../../services/api';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
+  // Autocomplete state
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  const searchContainerRef = useRef<HTMLFormElement>(null);
+
+  // Fetch all products on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const products = await getProducts();
+        setAllProducts(products.data);
+      } catch (error) {
+        console.error("Error fetching products for autocomplete", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Filter products based on search query
+  useEffect(() => {
+    if (searchQuery.trim().length > 1) {
+      const query = searchQuery.toLowerCase();
+      const filtered = allProducts.filter(
+        (p) => p.nombre.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query)
+      ).slice(0, 5); // Take top 5
+      setSuggestions(filtered);
+    } else {
+      setSuggestions([]);
+    }
+  }, [searchQuery, allProducts]);
+
+  // Click outside listener to close dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/catalogo?q=${encodeURIComponent(searchQuery.trim())}`);
       setIsMobileMenuOpen(false);
+      setShowSuggestions(false);
     }
+  };
+
+  const handleSuggestionClick = (product: Product) => {
+    setSearchQuery(product.nombre);
+    setShowSuggestions(false);
+    navigate(`/catalogo?q=${encodeURIComponent(product.nombre)}`);
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -55,18 +108,44 @@ export default function Header() {
           />
         </Link>
 
-        {/* Buscador Central (ALINEACIÓN ÓPTICA PERFECTA) */}
-        <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-3xl relative group">
+        {/* Buscador Central con Autocompletado */}
+        <form 
+          ref={searchContainerRef}
+          onSubmit={handleSearch} 
+          className="hidden lg:flex flex-1 max-w-3xl relative group"
+        >
           <input 
             type="text" 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setShowSuggestions(true)}
             placeholder="¿Qué estás buscando hoy? (Ej. Taladro, Cables, Pegamento...)" 
             className="w-full py-3 px-6 pr-14 bg-white border-2 border-primary/20 rounded-full focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium text-secondary shadow-sm placeholder-gray-400 leading-tight"
           />
           <button type="submit" className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary-dark text-white w-10 h-10 rounded-full transition-colors flex items-center justify-center">
             <Search size={18} />
           </button>
+
+          {/* Autocomplete Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className="absolute top-full left-0 w-full bg-white shadow-xl rounded-xl mt-2 overflow-hidden z-50 border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
+              {suggestions.map((product) => (
+                <li 
+                  key={product.id}
+                  onClick={() => handleSuggestionClick(product)}
+                  className="px-5 py-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 transition-colors border-b border-gray-50 last:border-none"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                    <Search size={14} />
+                  </div>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-secondary font-semibold text-sm truncate">{product.nombre}</span>
+                    <span className="text-gray-400 text-xs font-mono">SKU: {product.sku}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </form>
 
         {/* Acciones */}
