@@ -240,7 +240,7 @@ export default function Nosotros() {
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/5 blur-3xl rounded-full -z-10"></div>
               
               <div className="space-y-6 md:mt-12">
-                {coreValues.slice(0, 2).map((value, idx) => (
+                {coreValues.slice(0, 2).map((value) => (
                   <article
                     key={value.title}
                     className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-200/50 hover:shadow-primary/20 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group"
@@ -259,7 +259,7 @@ export default function Nosotros() {
                 ))}
               </div>
               <div className="space-y-6">
-                {coreValues.slice(2, 4).map((value, idx) => (
+                {coreValues.slice(2, 4).map((value) => (
                   <article
                     key={value.title}
                     className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-200/50 hover:shadow-primary/20 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group"

@@ -114,6 +114,9 @@ export default function ProductoDetalle() {
                 <img 
                   src={mainImage} 
                   alt={product.nombre}
+                  loading="lazy"
+                  width={500}
+                  height={500}
                   className="w-full h-full object-contain p-4 transition-transform duration-500 hover:scale-105"
                   onError={(e) => {
                     e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRGNiIvPjx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmaWxsPSIjOWNhM2FmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+U2luIGltYWdlbjwvdGV4dD48L3N2Zz4=';

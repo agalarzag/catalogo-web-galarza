@@ -55,6 +55,9 @@ export default function CategoryGrid() {
                 <img 
                   src={cat.imagen} 
                   alt={cat.nombre} 
+                  loading="lazy"
+                  width={300}
+                  height={300}
                   className="absolute inset-0 w-full h-full object-cover z-20 group-hover:scale-110 transition-transform duration-500"
                   onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />

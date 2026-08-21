@@ -26,6 +26,7 @@ export default function CartPanel() {
           </h2>
           <button 
             onClick={closeCart}
+            aria-label="Cerrar carrito"
             className="text-text-muted hover:text-secondary p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <X size={24} />
@@ -45,6 +46,9 @@ export default function CartPanel() {
                 <img 
                   src={item.imagenes && item.imagenes.length > 0 ? item.imagenes[0] : '/products/placeholder.jpg'} 
                   alt={item.nombre}
+                  loading="lazy"
+                  width={80}
+                  height={80}
                   className="w-20 h-20 object-contain rounded-xl border border-gray-100 p-1"
                 />
                 <div className="flex-1 flex flex-col justify-between">
@@ -63,6 +67,7 @@ export default function CartPanel() {
                     <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200">
                       <button 
                         onClick={() => updateQuantity(item.id, item.cantidad - 1)}
+                        aria-label="Disminuir cantidad"
                         className="p-1.5 text-gray-500 hover:text-primary transition-colors"
                       >
                         <Minus size={14} />
@@ -72,6 +77,7 @@ export default function CartPanel() {
                       </span>
                       <button 
                         onClick={() => updateQuantity(item.id, item.cantidad + 1)}
+                        aria-label="Aumentar cantidad"
                         className="p-1.5 text-gray-500 hover:text-primary transition-colors"
                       >
                         <Plus size={14} />
@@ -83,6 +89,7 @@ export default function CartPanel() {
                 {/* Remove button */}
                 <button 
                   onClick={() => removeFromCart(item.id)}
+                  aria-label="Eliminar del carrito"
                   className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
                 >
                   <Trash2 size={16} />

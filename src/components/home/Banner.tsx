@@ -77,10 +77,10 @@ export default function Banner() {
       </div>
 
       {/* Controles Manuales (RF-02) */}
-      <button onClick={prev} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md z-20">
+      <button onClick={prev} aria-label="Slide anterior" className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md z-20">
         <ChevronLeft size={28} />
       </button>
-      <button onClick={next} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md z-20">
+      <button onClick={next} aria-label="Siguiente slide" className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md z-20">
         <ChevronRight size={28} />
       </button>
 
@@ -90,6 +90,7 @@ export default function Banner() {
           <button 
             key={idx} 
             onClick={() => setCurrent(idx)}
+            aria-label={`Ir al slide ${idx + 1}`}
             className={`transition-all duration-300 rounded-full ${current === idx ? 'w-8 h-2.5 bg-white' : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/80'}`}
           />
         ))}
