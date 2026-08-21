@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Catalogo from './pages/Catalogo';
 import Nosotros from './pages/Nosotros';
 import Contacto from './pages/Contacto';
+import ProductoDetalle from './pages/ProductoDetalle';
 import QuoteModal from './components/common/QuoteModal';
 import NotFound from './pages/NotFound';
 
@@ -19,6 +20,7 @@ function App() {
           <Route path="/catalogo" element={<Catalogo />} />
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/contacto" element={<Contacto />} />
+          <Route path="/producto/:id" element={<ProductoDetalle />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
