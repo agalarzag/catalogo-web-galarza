@@ -1,75 +1,30 @@
-# React + TypeScript + Vite
+# Chamo Import - Catálogo Web Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📖 Descripción
+Plataforma e-commerce desarrollada para la evaluación técnica de MTA Software. Incluye un catálogo dinámico renderizado a partir de datos simulados, sistema de filtros múltiples y combinados, buscador en tiempo real y un carrito de cotizaciones global. Se respetó estrictamente la identidad visual de la marca y las reglas de interfaz.
 
-Currently, two official plugins are available:
+## 🚀 Enlace del Proyecto
+**[Ver Catálogo en Producción (Vercel)](https://catalogo-web-galarza.vercel.app/)**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 💻 Stack Tecnológico
+*   React 19, TypeScript, Vite, React Router (v7), Tailwind CSS, Lucide React.
 
-## React Compiler
+## ⚙️ Instalación y Despliegue Local
+Ejecutar los siguientes comandos en la terminal:
+`npm install`
+`npm run dev`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🏗️ Estructura Principal
+*   `/public/brand` y `/public/products`: Assets visuales.
+*   `/src/components`: Componentes modulares y reutilizables.
+*   `/src/context`: Estado Global (Context API) para el Carrito.
+*   `/src/data`: Base de datos simulada en formato JSON.
+*   `/src/services`: Capa de servicio aislada simulando latencia.
 
-## Expanding the ESLint configuration
+## 🧠 Decisiones de Diseño y Dificultades
+*   **Decisión:** Se implementó Context API puro con Hooks Personalizados para manejar el estado del carrito en toda la app sin librerías de terceros.
+*   **Dificultad:** La sincronización de múltiples filtros cruzados (búsqueda con debounce, categorías, marcas, precio, stock).
+*   **Solución:** Centralizar la lógica en Catalogo.tsx usando useMemo y paginación derivada (12 productos).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+## 📊 Rendimiento y Accesibilidad (Lighthouse)
+![Reporte Lighthouse final](/lighthouse.png)
