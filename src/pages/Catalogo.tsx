@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, type FC } from 'react';
+import { useEffect, useState, useMemo, type FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Search,
@@ -6,8 +6,6 @@ import {
   X,
   ChevronDown,
   ChevronUp,
-  LayoutGrid,
-  List,
   PackageSearch,
 } from 'lucide-react';
 import {
@@ -24,9 +22,7 @@ import ProductCard from '../components/catalog/ProductCard';
 
 const ProductCardSkeleton: FC = () => (
   <div className="animate-pulse flex flex-col bg-white rounded-2xl border border-border overflow-hidden">
-    {/* Image placeholder */}
     <div className="aspect-square bg-gray-200" />
-    {/* Content */}
     <div className="p-4 space-y-3">
       <div className="h-3 bg-gray-200 rounded w-16" />
       <div className="space-y-1.5">
@@ -57,10 +53,9 @@ const SidebarSkeleton: FC = () => (
 );
 
 /* ================================================================
-   TEXT NORMALIZATION (accent / diacritic removal)
+   TEXT NORMALIZATION
    ================================================================ */
 
-/** Strips accents so "lapiz" matches "lápiz" */
 const normalize = (str: string) =>
   str
     .normalize('NFD')
@@ -115,17 +110,25 @@ export default function Catalogo() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  /* ── Filter State ─── */
+  /* ── Filter State (RF-07) ─── */
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    searchParams.get('categoria')
-  );
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  
   const [selectedPriceRange, setSelectedPriceRange] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<SortKey>('relevancia');
+
+  /* ── Pagination State (RF-09) ─── */
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 12;
 
   /* ── UI State ─── */
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [categoriesExpanded, setCategoriesExpanded] = useState(true);
+  const [brandsExpanded, setBrandsExpanded] = useState(true);
   const [priceExpanded, setPriceExpanded] = useState(true);
 
   /* ── Fetch data on mount ─── */
@@ -136,50 +139,71 @@ export default function Catalogo() {
         getProducts(),
         getCategories(),
       ]);
-      setProducts(productsData);
-      setCategories(categoriesData);
+      setProducts(productsData || []);
+      setCategories(categoriesData || []);
       setLoading(false);
     };
     fetchData();
   }, []);
 
-  /* ── Sync URL param → selectedCategory ─── */
+  /* ── Sync URL param (categoria, search) on mount ─── */
   useEffect(() => {
     const catParam = searchParams.get('categoria');
     if (catParam) {
-      setSelectedCategory(catParam);
+      setSelectedCategories([catParam]);
+    }
+    const qParam = searchParams.get('q');
+    if (qParam) {
+      setSearchQuery(qParam);
     }
   }, [searchParams]);
 
-  /* ── Update URL when category changes ─── */
-  const handleCategoryChange = useCallback(
-    (catId: string | null) => {
-      setSelectedCategory(catId);
-      if (catId) {
-        setSearchParams({ categoria: catId });
-      } else {
-        setSearchParams({});
-      }
-    },
-    [setSearchParams]
-  );
+  /* ── Extract unique brands ─── */
+  const uniqueBrands = useMemo(() => {
+    const brands = products.map(p => p.marca);
+    return Array.from(new Set(brands)).sort();
+  }, [products]);
+
+  /* ── Debounce Search (RF-06) ─── */
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  /* ── Reset Pagination when filters change ─── */
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearchQuery, selectedCategories, selectedBrands, inStockOnly, selectedPriceRange, sortBy]);
 
   /* ── Filtered & sorted products (memoized) ─── */
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
     // Category filter
-    if (selectedCategory) {
-      result = result.filter((p) => p.categoria === selectedCategory);
+    if (selectedCategories.length > 0) {
+      result = result.filter((p) => selectedCategories.includes(p.categoria));
     }
 
-    // Search filter (by name or SKU) — accent-insensitive
-    if (searchQuery.trim()) {
-      const q = normalize(searchQuery.trim());
+    // Brands filter
+    if (selectedBrands.length > 0) {
+      result = result.filter((p) => selectedBrands.includes(p.marca));
+    }
+
+    // Stock filter
+    if (inStockOnly) {
+      result = result.filter((p) => p.stock > 0);
+    }
+
+    // Search filter (by name, SKU, or BRAND)
+    if (debouncedSearchQuery.trim()) {
+      const q = normalize(debouncedSearchQuery.trim());
       result = result.filter(
         (p) =>
           normalize(p.nombre).includes(q) ||
-          normalize(p.sku).includes(q)
+          normalize(p.sku).includes(q) ||
+          normalize(p.marca).includes(q)
       );
     }
 
@@ -204,36 +228,48 @@ export default function Catalogo() {
         break;
       case 'relevancia':
       default:
-        // Featured products first, then by id
+        // Featured products first, then by ID to ensure stable sort
         result.sort((a, b) => {
           if (a.destacado && !b.destacado) return -1;
           if (!a.destacado && b.destacado) return 1;
-          return 0;
+          return a.id.localeCompare(b.id);
         });
         break;
     }
 
     return result;
-  }, [products, selectedCategory, searchQuery, selectedPriceRange, sortBy]);
+  }, [products, selectedCategories, selectedBrands, inStockOnly, debouncedSearchQuery, selectedPriceRange, sortBy]);
+
+  /* ── Displayed Products (Pagination) ─── */
+  const displayedProducts = useMemo(() => {
+    return filteredProducts.slice(0, page * ITEMS_PER_PAGE);
+  }, [filteredProducts, page]);
 
   /* ── Active filter count (for badge) ─── */
-  const activeFilterCount = [
-    selectedCategory !== null,
-    selectedPriceRange !== null,
-    searchQuery.trim().length > 0,
-  ].filter(Boolean).length;
+  const activeFilterCount = selectedCategories.length + selectedBrands.length + (inStockOnly ? 1 : 0) + (selectedPriceRange !== null ? 1 : 0);
 
   /* ── Clear all filters ─── */
   const clearAllFilters = () => {
     setSearchQuery('');
-    handleCategoryChange(null);
+    setSelectedCategories([]);
+    setSelectedBrands([]);
+    setInStockOnly(false);
     setSelectedPriceRange(null);
     setSortBy('relevancia');
+    setSearchParams({});
   };
 
-  /* ── Get the readable category name ─── */
-  const getCategoryName = (catId: string) =>
-    categories.find((c) => c.id === catId)?.nombre ?? catId;
+  const toggleCategory = (catId: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(catId) ? prev.filter(c => c !== catId) : [...prev, catId]
+    );
+  };
+
+  const toggleBrand = (brand: string) => {
+    setSelectedBrands(prev => 
+      prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
+    );
+  };
 
   /* ================================================================
      SIDEBAR CONTENT (shared between desktop & mobile)
@@ -255,6 +291,22 @@ export default function Catalogo() {
         </div>
       )}
 
+      {/* ── STOCK FILTER ─── */}
+      <label className="flex items-center gap-3 cursor-pointer group">
+        <input 
+          type="checkbox" 
+          checked={inStockOnly}
+          onChange={(e) => setInStockOnly(e.target.checked)}
+          className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary/20 transition-colors cursor-pointer"
+        />
+        <span className="text-sm font-medium text-secondary group-hover:text-primary transition-colors">
+          Solo disponibles (Con Stock)
+        </span>
+      </label>
+
+      {/* ── DIVIDER ─── */}
+      <div className="h-px bg-border" />
+
       {/* ── CATEGORY FILTER ─── */}
       <div>
         <button
@@ -272,40 +324,63 @@ export default function Catalogo() {
         </button>
 
         {categoriesExpanded && (
-          <div className="mt-3 space-y-1">
-            {/* "Todas" option */}
-            <button
-              onClick={() => handleCategoryChange(null)}
-              className={`
-                w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                ${
-                  selectedCategory === null
-                    ? 'bg-primary/10 text-primary font-semibold'
-                    : 'text-text-muted hover:bg-gray-50 hover:text-secondary'
-                }
-              `}
-            >
-              Todas las categorías
-            </button>
+          <div className="mt-4 space-y-2.5">
             {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryChange(cat.id)}
-                className={`
-                  w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${
-                    selectedCategory === cat.id
-                      ? 'bg-primary/10 text-primary font-semibold'
-                      : 'text-text-muted hover:bg-gray-50 hover:text-secondary'
-                  }
-                `}
-              >
-                {cat.nombre}
-                {/* Count */}
-                <span className="ml-auto float-right text-xs opacity-60">
+              <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  checked={selectedCategories.includes(cat.id)}
+                  onChange={() => toggleCategory(cat.id)}
+                  className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20 transition-colors cursor-pointer"
+                />
+                <span className="text-sm font-medium text-text-muted group-hover:text-secondary transition-colors flex-1">
+                  {cat.nombre}
+                </span>
+                <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">
                   {products.filter((p) => p.categoria === cat.id).length}
                 </span>
-              </button>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── DIVIDER ─── */}
+      <div className="h-px bg-border" />
+
+      {/* ── BRAND FILTER ─── */}
+      <div>
+        <button
+          onClick={() => setBrandsExpanded(!brandsExpanded)}
+          className="flex items-center justify-between w-full text-left"
+        >
+          <h3 className="font-title font-bold text-secondary text-sm uppercase tracking-wide">
+            Marcas
+          </h3>
+          {brandsExpanded ? (
+            <ChevronUp size={16} className="text-text-muted" />
+          ) : (
+            <ChevronDown size={16} className="text-text-muted" />
+          )}
+        </button>
+
+        {brandsExpanded && (
+          <div className="mt-4 space-y-2.5 max-h-48 overflow-y-auto pr-2">
+            {uniqueBrands.map((brand) => (
+              <label key={brand} className="flex items-center gap-3 cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  checked={selectedBrands.includes(brand)}
+                  onChange={() => toggleBrand(brand)}
+                  className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20 transition-colors cursor-pointer"
+                />
+                <span className="text-sm font-medium text-text-muted group-hover:text-secondary transition-colors flex-1">
+                  {brand}
+                </span>
+                <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">
+                  {products.filter((p) => p.marca === brand).length}
+                </span>
+              </label>
             ))}
           </div>
         )}
@@ -360,7 +435,7 @@ export default function Catalogo() {
      RENDER
      ================================================================ */
   return (
-    <section className="min-h-screen bg-bg">
+    <section className="min-h-screen bg-bg pb-12">
       {/* ── PAGE HEADER ─── */}
       <div 
         className="relative text-white" 
@@ -375,22 +450,6 @@ export default function Catalogo() {
             Explora nuestra amplia variedad de productos de ferretería, eléctricos,
             iluminación, adhesivos y mucho más.
           </p>
-
-          {/* Breadcrumb-style active filters */}
-          {selectedCategory && !loading && (
-            <div className="flex items-center gap-2 mt-4">
-              <span className="text-white/50 text-xs">Filtrado por:</span>
-              <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5">
-                {getCategoryName(selectedCategory)}
-                <button
-                  onClick={() => handleCategoryChange(null)}
-                  className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                >
-                  <X size={12} />
-                </button>
-              </span>
-            </div>
-          )}
         </div>
       </div>
 
@@ -407,7 +466,7 @@ export default function Catalogo() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar por nombre o SKU..."
+              placeholder="Buscar por nombre, SKU o Marca..."
               className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-secondary placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
             />
             {searchQuery && (
@@ -456,8 +515,8 @@ export default function Catalogo() {
 
           {/* Results count */}
           {!loading && (
-            <span className="hidden sm:block text-xs text-text-muted whitespace-nowrap ml-auto">
-              {filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''}
+            <span className="hidden sm:block text-xs text-text-muted whitespace-nowrap ml-auto font-medium">
+              Mostrando {displayedProducts.length} de {filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''}
             </span>
           )}
         </div>
@@ -468,7 +527,7 @@ export default function Catalogo() {
         <div className="flex gap-8">
           {/* ────── DESKTOP SIDEBAR ────── */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-20 bg-white rounded-2xl border border-border shadow-sm p-6">
+            <div className="sticky top-24 bg-white rounded-2xl border border-border shadow-sm p-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
               {loading ? <SidebarSkeleton /> : <FilterContent />}
             </div>
           </aside>
@@ -482,31 +541,45 @@ export default function Catalogo() {
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>
-            ) : filteredProducts.length === 0 ? (
+            ) : displayedProducts.length === 0 ? (
               /* Empty State */
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="bg-gray-100 rounded-full p-6 mb-6">
-                  <PackageSearch size={48} className="text-gray-400" />
+              <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
+                <div className="bg-gray-50 rounded-full p-6 mb-6 border border-gray-100">
+                  <PackageSearch size={48} className="text-gray-300" />
                 </div>
                 <h3 className="font-title font-bold text-xl text-secondary mb-2">
                   No encontramos productos
                 </h3>
                 <p className="text-text-muted text-sm max-w-sm mb-6">
-                  Intenta ajustar tus filtros de búsqueda o explora todas nuestras categorías.
+                  Intenta ajustar tus filtros de búsqueda o explora todas nuestras categorías para encontrar lo que necesitas.
                 </p>
                 <button
                   onClick={clearAllFilters}
-                  className="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md"
+                  className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl font-bold text-sm transition-all shadow-lg hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-0.5"
                 >
-                  Limpiar filtros
+                  Limpiar todos los filtros
                 </button>
               </div>
             ) : (
-              /* Product Grid */
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+              /* Product Grid & Load More */
+              <div className="space-y-12">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                  {displayedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+                
+                {/* Pagination Load More Button */}
+                {displayedProducts.length < filteredProducts.length && (
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setPage((prev) => prev + 1)}
+                      className="bg-white border-2 border-gray-200 hover:border-primary text-secondary hover:text-primary px-8 py-3 rounded-full font-bold transition-all shadow-sm hover:shadow-md"
+                    >
+                      Cargar más productos
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -516,14 +589,11 @@ export default function Catalogo() {
       {/* ── MOBILE FILTERS MODAL ─── */}
       {mobileFiltersOpen && (
         <>
-          {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setMobileFiltersOpen(false)}
           />
-          {/* Panel */}
           <div className="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white z-50 lg:hidden shadow-2xl flex flex-col animate-slide-in-left">
-            {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-border">
               <h2 className="font-title font-bold text-lg text-secondary flex items-center gap-2">
                 <SlidersHorizontal size={18} className="text-primary" />
@@ -537,7 +607,6 @@ export default function Catalogo() {
               </button>
             </div>
 
-            {/* Mobile Sort (shown in modal for mobile) */}
             <div className="p-5 border-b border-border">
               <h3 className="font-title font-bold text-secondary text-sm uppercase tracking-wide mb-3">
                 Ordenar por
@@ -562,16 +631,14 @@ export default function Catalogo() {
               </div>
             </div>
 
-            {/* Filters */}
             <div className="flex-1 overflow-y-auto p-5">
               <FilterContent />
             </div>
 
-            {/* Apply button */}
-            <div className="p-5 border-t border-border">
+            <div className="p-5 border-t border-border bg-gray-50">
               <button
                 onClick={() => setMobileFiltersOpen(false)}
-                className="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-xl font-title font-semibold text-sm transition-all shadow-sm hover:shadow-md"
+                className="w-full bg-primary hover:bg-primary-dark text-white py-3.5 rounded-xl font-title font-semibold text-sm transition-all shadow-sm hover:shadow-md"
               >
                 Ver {filteredProducts.length} resultado{filteredProducts.length !== 1 ? 's' : ''}
               </button>
