@@ -351,8 +351,12 @@ export default function Catalogo() {
   return (
     <section className="min-h-screen bg-bg">
       {/* ── PAGE HEADER ─── */}
-      <div className="bg-gradient-to-r from-secondary to-primary-dark text-white">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">
+      <div 
+        className="relative text-white" 
+        style={{ backgroundImage: "url('/hero-catalogo.jpg')", backgroundSize: "cover", backgroundPosition: "center" }}
+      >
+        <div className="absolute inset-0 bg-secondary/85 mix-blend-multiply"></div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-title font-black tracking-tight mb-2 text-white">
             Catálogo de Productos
           </h1>

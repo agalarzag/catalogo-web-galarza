@@ -9,7 +9,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
-  // Autocomplete state
+  // Autocomplete state (crash-proofed)
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [suggestions, setSuggestions] = useState<Product[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -21,23 +21,33 @@ export default function Header() {
     const fetchProducts = async () => {
       try {
         const products = await getProducts();
-        setAllProducts(products.data);
+        setAllProducts(Array.isArray(products?.data) ? products.data : (Array.isArray(products) ? products : []));
       } catch (error) {
         console.error("Error fetching products for autocomplete", error);
+        setAllProducts([]);
       }
     };
     fetchProducts();
   }, []);
 
-  // Filter products based on search query
+  // Filter products based on search query with strict safety checks
   useEffect(() => {
-    if (searchQuery.trim().length > 1) {
-      const query = searchQuery.toLowerCase();
-      const filtered = allProducts.filter(
-        (p) => p.nombre.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query)
-      ).slice(0, 5); // Take top 5
-      setSuggestions(filtered);
-    } else {
+    try {
+      if (searchQuery?.trim().length > 1) {
+        const query = searchQuery.toLowerCase().trim();
+        const productList = Array.isArray(allProducts) ? allProducts : [];
+        
+        const filtered = productList.filter(
+          (p) => 
+            p?.nombre?.toLowerCase().includes(query) || 
+            p?.sku?.toLowerCase().includes(query)
+        ).slice(0, 5); // Take top 5
+        setSuggestions(filtered);
+      } else {
+        setSuggestions([]);
+      }
+    } catch (e) {
+      console.error("Error filtering suggestions", e);
       setSuggestions([]);
     }
   }, [searchQuery, allProducts]);
@@ -55,7 +65,7 @@ export default function Header() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
+    if (searchQuery?.trim()) {
       navigate(`/catalogo?q=${encodeURIComponent(searchQuery.trim())}`);
       setIsMobileMenuOpen(false);
       setShowSuggestions(false);
@@ -63,10 +73,12 @@ export default function Header() {
   };
 
   const handleSuggestionClick = (product: Product) => {
-    setSearchQuery(product.nombre);
-    setShowSuggestions(false);
-    navigate(`/catalogo?q=${encodeURIComponent(product.nombre)}`);
-    setIsMobileMenuOpen(false);
+    if (product?.nombre) {
+      setSearchQuery(product.nombre);
+      setShowSuggestions(false);
+      navigate(`/catalogo?q=${encodeURIComponent(product.nombre)}`);
+      setIsMobileMenuOpen(false);
+    }
   };
 
   return (
@@ -117,7 +129,7 @@ export default function Header() {
           <input 
             type="text" 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value ?? '')}
             onFocus={() => setShowSuggestions(true)}
             placeholder="¿Qué estás buscando hoy? (Ej. Taladro, Cables, Pegamento...)" 
             className="w-full py-3 px-6 pr-14 bg-white border-2 border-primary/20 rounded-full focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium text-secondary shadow-sm placeholder-gray-400 leading-tight"
@@ -126,12 +138,12 @@ export default function Header() {
             <Search size={18} />
           </button>
 
-          {/* Autocomplete Dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
+          {/* Autocomplete Dropdown (Safe Render) */}
+          {showSuggestions && suggestions?.length > 0 && (
             <ul className="absolute top-full left-0 w-full bg-white shadow-xl rounded-xl mt-2 overflow-hidden z-50 border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
               {suggestions.map((product) => (
                 <li 
-                  key={product.id}
+                  key={product?.id}
                   onClick={() => handleSuggestionClick(product)}
                   className="px-5 py-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 transition-colors border-b border-gray-50 last:border-none"
                 >
@@ -139,8 +151,8 @@ export default function Header() {
                     <Search size={14} />
                   </div>
                   <div className="flex flex-col overflow-hidden">
-                    <span className="text-secondary font-semibold text-sm truncate">{product.nombre}</span>
-                    <span className="text-gray-400 text-xs font-mono">SKU: {product.sku}</span>
+                    <span className="text-secondary font-semibold text-sm truncate">{product?.nombre}</span>
+                    <span className="text-gray-400 text-xs font-mono">SKU: {product?.sku}</span>
                   </div>
                 </li>
               ))}
@@ -219,7 +231,7 @@ export default function Header() {
               <input 
                 type="text" 
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value ?? '')}
                 placeholder="Buscar productos..." 
                 className="w-full py-2.5 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
               />
