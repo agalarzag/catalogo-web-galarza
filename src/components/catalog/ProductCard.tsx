@@ -66,6 +66,7 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
             src={product.imagenes[0]}
             alt={product.nombre}
             loading="lazy"
+            decoding="async"
             width={500}
             height={500}
             className={`

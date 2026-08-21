@@ -56,14 +56,21 @@ export default function Banner() {
         className="flex transition-transform duration-700 ease-out h-full"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
-        {slides.map((slide) => (
+        {slides.map((slide, idx) => (
           <div 
             key={slide.id} 
             className="min-w-full h-full flex items-center justify-center text-white px-8 relative"
-            style={{ backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
           >
+            {/* Real image for LCP/SEO */}
+            <img 
+              src={slide.image} 
+              alt={slide.title}
+              className="absolute inset-0 w-full h-full object-cover z-0"
+              fetchPriority={idx === 0 ? "high" : "auto"}
+              loading={idx === 0 ? "eager" : "lazy"}
+            />
             {/* Overlay background to ensure text contrast */}
-            <div className="absolute inset-0 bg-secondary/70 mix-blend-multiply"></div>
+            <div className="absolute inset-0 bg-secondary/70 mix-blend-multiply z-0"></div>
             
             <div className="text-center max-w-3xl animate-in fade-in zoom-in duration-700 relative z-10">
               <h2 className="text-4xl md:text-5xl lg:text-7xl font-title font-black mb-4 tracking-tight leading-tight">{slide.title}</h2>
