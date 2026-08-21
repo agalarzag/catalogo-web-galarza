@@ -3,11 +3,12 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getProducts, type Product } from '../services/api';
 import ProductCard from '../components/catalog/ProductCard';
 import { ShoppingCart, MessageCircle, ChevronRight, PackageSearch } from 'lucide-react';
-import { openQuoteModal } from '../components/common/QuoteModal';
+import { useCart } from '../context/CartContext';
 
 export default function ProductoDetalle() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { addToCart, openCart } = useCart();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -19,10 +20,7 @@ export default function ProductoDetalle() {
       setLoading(true);
       setError(false);
       try {
-        const response = await getProducts();
-        const products: Product[] = Array.isArray(response?.data) 
-          ? response.data 
-          : Array.isArray(response) ? response : [];
+        const products = await getProducts() || [];
         
         const found = products.find(p => p.id === id);
         
@@ -189,8 +187,8 @@ export default function ProductoDetalle() {
                       : 'bg-primary hover:bg-primary-dark text-white shadow-lg hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1'
                   }`}
                   onClick={() => {
-                    // Logic to add to cart goes here
-                    openQuoteModal();
+                    addToCart(product);
+                    openCart();
                   }}
                 >
                   <ShoppingCart size={20} />

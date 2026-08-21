@@ -2,6 +2,7 @@ import { useState, type FC } from 'react';
 import { ShoppingCart, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { type Product } from '../../services/api';
+import { useCart } from '../../context/CartContext';
 
 interface ProductCardProps {
   product: Product;
@@ -20,6 +21,7 @@ const getTagStyle = (tag: string) =>
   TAG_STYLES[tag] ?? { bg: 'bg-accent', text: 'text-white' };
 
 const ProductCard: FC<ProductCardProps> = ({ product }) => {
+  const { addToCart, openCart } = useCart();
   const [imgError, setImgError] = useState(false);
   const hasImage = product.imagenes.length > 0 && !imgError;
   const isOutOfStock = product.stock === 0;
@@ -146,19 +148,25 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
         {/* Add to Cart Button */}
         <button
           disabled={isOutOfStock}
+          onClick={(e) => { 
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            addToCart(product); 
+            openCart(); 
+          }}
           className={`
             mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl
             font-title font-semibold text-sm tracking-wide
             transition-all duration-300
             ${
               isOutOfStock
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                ? 'bg-gray-400 text-white cursor-not-allowed'
                 : 'bg-primary hover:bg-primary-dark text-white shadow-sm hover:shadow-md hover:shadow-primary/30 active:scale-[0.97]'
             }
           `}
         >
           <ShoppingCart size={16} />
-          {isOutOfStock ? 'Sin Stock' : 'Agregar al Carrito'}
+          {isOutOfStock ? 'Agotado' : 'Agregar al Carrito'}
         </button>
       </div>
     </article>

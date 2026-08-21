@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, Phone, ChevronDown, Package } from 'lucide-react';
 import { openQuoteModal } from '../common/QuoteModal';
 import { getProducts, type Product } from '../../services/api';
+import { useCart } from '../../context/CartContext';
 
 /** Strips accents so "lapiz" matches "lápiz" */
 const normalize = (str: string) =>
@@ -15,6 +16,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const { totalItems, subtotal, openCart } = useCart();
 
   // Autocomplete state (crash-proofed)
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -176,23 +178,31 @@ export default function Header() {
             SOLICITAR COTIZACIÓN
           </button>
           
-          <button className="group relative flex items-center gap-3 bg-secondary hover:bg-secondary/90 text-white px-5 py-2.5 rounded-full transition-all shadow-sm hover:shadow-md">
+          <button onClick={openCart} className="group relative flex items-center gap-3 bg-secondary hover:bg-secondary/90 text-white px-5 py-2.5 rounded-full transition-all shadow-sm hover:shadow-md">
             <ShoppingCart size={20} className="text-accent group-hover:scale-110 transition-transform" />
             <div className="flex flex-col items-start leading-tight">
               <span className="text-[10px] text-gray-300 font-medium uppercase tracking-wider">Mi Carrito</span>
-              <span className="text-sm font-bold">S/ 0.00</span>
+              <span className="text-sm font-bold">
+                {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(subtotal)}
+              </span>
             </div>
-            <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[11px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">
-              0
-            </span>
+            {totalItems > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[11px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">
+                {totalItems}
+              </span>
+            )}
           </button>
         </div>
 
         {/* Botones Móviles */}
         <div className="flex lg:hidden items-center gap-3">
-          <button className="relative text-secondary p-2 bg-gray-100 rounded-full">
+          <button onClick={openCart} className="relative text-secondary p-2 bg-gray-100 rounded-full">
             <ShoppingCart size={22} />
-            <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                {totalItems}
+              </span>
+            )}
           </button>
           <button 
             className="text-secondary p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
