@@ -26,9 +26,15 @@ export default function Footer() {
         {/* Columna 1: Marca y Propuesta de Valor */}
         <div className="space-y-6">
           <div className="flex items-center">
-             <span className="text-3xl font-title font-black tracking-tight text-white">
-               CHAMO<span className="text-accent">IMPORT</span>
-             </span>
+            <img 
+              src="/brand/logo.png" 
+              alt="Chamo Import Logo" 
+              className="h-12 object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.insertAdjacentHTML('beforeend', '<span class="text-3xl font-title font-black tracking-tight text-white">CHAMO<span class="text-accent">IMPORT</span></span>');
+              }}
+            />
           </div>
           <p className="text-sm text-gray-400 leading-relaxed">
             Especialistas en ferretería, iluminación y artículos eléctricos. Potenciamos el crecimiento de tu proyecto con herramientas de alta precisión y calidad garantizada.
@@ -79,6 +85,13 @@ export default function Footer() {
               <div>
                 <p className="font-medium text-white">cotizaciones@chamoimport.com</p>
                 <p className="text-xs">Respuesta en 24h</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3 hover:text-white transition-colors cursor-default">
+              <div className="bg-white/10 p-2 rounded-lg text-accent"><Clock size={16} /></div>
+              <div>
+                <p className="font-medium text-white">Horario de Atención</p>
+                <p className="text-xs">L-V: 8am-6pm | Sáb: 8am-1pm</p>
               </div>
             </li>
           </ul>

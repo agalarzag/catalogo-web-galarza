@@ -89,7 +89,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full font-sans relative">
+    <header className="w-full font-sans sticky top-0 z-50 bg-white shadow-md">
       {/* 1. TOP BAR: Contacto y Redes */}
       <div className="hidden md:flex bg-gray-100 text-text-muted py-1.5 px-4 md:px-8 text-xs justify-between items-center border-b border-border">
         <div className="flex items-center gap-4">
