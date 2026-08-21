@@ -26,7 +26,7 @@ export interface Product {
   especificaciones: Record<string, string>;
 }
 
-// Utilidad para simular el retardo de red (500ms a 800ms)
+// Utilidad para simular el retardo de red (500ms a 800ms) - Forced HMR
 const randomDelay = () => {
   const ms = Math.floor(Math.random() * 300) + 500;
   return new Promise(resolve => setTimeout(resolve, ms));
