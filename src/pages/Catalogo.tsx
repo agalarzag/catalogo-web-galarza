@@ -57,6 +57,17 @@ const SidebarSkeleton: FC = () => (
 );
 
 /* ================================================================
+   TEXT NORMALIZATION (accent / diacritic removal)
+   ================================================================ */
+
+/** Strips accents so "lapiz" matches "lápiz" */
+const normalize = (str: string) =>
+  str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+/* ================================================================
    PRICE RANGE UTILITIES
    ================================================================ */
 
@@ -162,13 +173,13 @@ export default function Catalogo() {
       result = result.filter((p) => p.categoria === selectedCategory);
     }
 
-    // Search filter (by name or SKU)
+    // Search filter (by name or SKU) — accent-insensitive
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
+      const q = normalize(searchQuery.trim());
       result = result.filter(
         (p) =>
-          p.nombre.toLowerCase().includes(q) ||
-          p.sku.toLowerCase().includes(q)
+          normalize(p.nombre).includes(q) ||
+          normalize(p.sku).includes(q)
       );
     }
 

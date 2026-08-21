@@ -4,6 +4,13 @@ import { Search, ShoppingCart, Menu, X, Phone, ChevronDown, Package } from 'luci
 import { openQuoteModal } from '../common/QuoteModal';
 import { getProducts, type Product } from '../../services/api';
 
+/** Strips accents so "lapiz" matches "lápiz" */
+const normalize = (str: string) =>
+  str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,17 +37,17 @@ export default function Header() {
     fetchProducts();
   }, []);
 
-  // Filter products based on search query with strict safety checks
+  // Filter products based on search query with strict safety checks — accent-insensitive
   useEffect(() => {
     try {
       if (searchQuery?.trim().length > 1) {
-        const query = searchQuery.toLowerCase().trim();
+        const query = normalize(searchQuery.trim());
         const productList = Array.isArray(allProducts) ? allProducts : [];
         
         const filtered = productList.filter(
           (p) => 
-            p?.nombre?.toLowerCase().includes(query) || 
-            p?.sku?.toLowerCase().includes(query)
+            normalize(p?.nombre ?? '').includes(query) || 
+            normalize(p?.sku ?? '').includes(query)
         ).slice(0, 5); // Take top 5
         setSuggestions(filtered);
       } else {
@@ -82,7 +89,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full font-sans">
+    <header className="w-full font-sans relative">
       {/* 1. TOP BAR: Contacto y Redes */}
       <div className="hidden md:flex bg-gray-100 text-text-muted py-1.5 px-4 md:px-8 text-xs justify-between items-center border-b border-border">
         <div className="flex items-center gap-4">
