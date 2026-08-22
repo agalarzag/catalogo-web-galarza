@@ -225,10 +225,10 @@ export default function Header() {
             <ChevronDown size={16} className="ml-2 group-hover:rotate-180 transition-transform duration-300" />
             
             <div className="absolute top-full left-0 w-64 bg-white text-secondary shadow-xl rounded-b-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-gray-100 flex flex-col py-2">
-              <Link to="/catalogo?categoria=herramientas" className="px-5 py-2.5 hover:bg-gray-50 hover:text-primary font-medium transition-colors border-b border-gray-50">🛠️ Herramientas</Link>
-              <Link to="/catalogo?categoria=electricos" className="px-5 py-2.5 hover:bg-gray-50 hover:text-primary font-medium transition-colors border-b border-gray-50">⚡ Eléctricos</Link>
-              <Link to="/catalogo?categoria=adhesivos" className="px-5 py-2.5 hover:bg-gray-50 hover:text-primary font-medium transition-colors border-b border-gray-50">🧴 Adhesivos y Cintas</Link>
-              <Link to="/catalogo?categoria=iluminacion" className="px-5 py-2.5 hover:bg-gray-50 hover:text-primary font-medium transition-colors border-b border-gray-50">💡 Iluminación</Link>
+              <Link to="/catalogo?categoria=cat-herramientas" className="px-5 py-2.5 hover:bg-gray-50 hover:text-primary font-medium transition-colors border-b border-gray-50">🛠️ Herramientas</Link>
+              <Link to="/catalogo?categoria=cat-electricos" className="px-5 py-2.5 hover:bg-gray-50 hover:text-primary font-medium transition-colors border-b border-gray-50">⚡ Eléctricos</Link>
+              <Link to="/catalogo?categoria=cat-adhesivos" className="px-5 py-2.5 hover:bg-gray-50 hover:text-primary font-medium transition-colors border-b border-gray-50">🧴 Adhesivos y Cintas</Link>
+              <Link to="/catalogo?categoria=cat-iluminacion" className="px-5 py-2.5 hover:bg-gray-50 hover:text-primary font-medium transition-colors border-b border-gray-50">💡 Iluminación</Link>
               <Link to="/catalogo" className="px-5 py-2.5 hover:bg-gray-50 hover:text-primary font-bold transition-colors text-primary text-center text-xs uppercase mt-1">Ver todo el catálogo</Link>
             </div>
           </div>
@@ -263,7 +263,7 @@ export default function Header() {
             <nav className="flex flex-col border-t border-gray-100 pt-2">
               <Link to="/" className="py-3 font-medium text-secondary hover:text-primary border-b border-gray-50">Inicio</Link>
               <Link to="/catalogo" className="py-3 font-medium text-secondary hover:text-primary border-b border-gray-50">Tienda</Link>
-              <Link to="/catalogo?categoria=herramientas" className="py-3 pl-4 font-medium text-gray-500 hover:text-primary border-b border-gray-50 text-sm">- Categorías</Link>
+              <Link to="/catalogo?categoria=cat-herramientas" className="py-3 pl-4 font-medium text-gray-500 hover:text-primary border-b border-gray-50 text-sm">- Categorías</Link>
               <Link to="/nosotros" className="py-3 font-medium text-secondary hover:text-primary border-b border-gray-50">Nosotros</Link>
               <Link to="/contacto" className="py-3 font-medium text-secondary hover:text-primary">Contáctanos</Link>
             </nav>
