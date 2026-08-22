@@ -110,16 +110,25 @@ export default function Catalogo() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  /* ── Filter State (RF-07) ─── */
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [inStockOnly, setInStockOnly] = useState(false);
-  
-  const [selectedPriceRange, setSelectedPriceRange] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState<SortKey>('relevancia');
+  /* ── Filter State derived from URL (single source of truth) ─── */
+  const selectedCategories = useMemo(
+    () => searchParams.getAll('categoria'),
+    [searchParams]
+  );
+  const selectedBrands = useMemo(
+    () => searchParams.getAll('marca'),
+    [searchParams]
+  );
+  const inStockOnly = searchParams.get('stock') === '1';
+  const selectedPriceRange = useMemo(() => {
+    const v = searchParams.get('precio');
+    return v !== null ? Number(v) : null;
+  }, [searchParams]);
+  const sortBy = (searchParams.get('orden') as SortKey) ?? 'relevancia';
+
+  /* ── Search query (local + debounced, synced to URL) ─── */
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? '');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(() => searchParams.get('q') ?? '');
 
   /* ── Pagination State (RF-09) ─── */
   const [page, setPage] = useState(1);
@@ -146,17 +155,17 @@ export default function Catalogo() {
     fetchData();
   }, []);
 
-  /* ── Sync URL param (categoria, search) on mount ─── */
-  useEffect(() => {
-    const catParam = searchParams.get('categoria');
-    if (catParam) {
-      setSelectedCategories([catParam]);
-    }
-    const qParam = searchParams.get('q');
-    if (qParam) {
-      setSearchQuery(qParam);
-    }
-  }, [searchParams]);
+  /* ── Helper: update searchParams while keeping unrelated params intact ─── */
+  const updateParams = (updater: (next: URLSearchParams) => void) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        updater(next);
+        return next;
+      },
+      { replace: true }
+    );
+  };
 
   /* ── Extract unique brands ─── */
   const uniqueBrands = useMemo(() => {
@@ -251,24 +260,31 @@ export default function Catalogo() {
   /* ── Clear all filters ─── */
   const clearAllFilters = () => {
     setSearchQuery('');
-    setSelectedCategories([]);
-    setSelectedBrands([]);
-    setInStockOnly(false);
-    setSelectedPriceRange(null);
-    setSortBy('relevancia');
-    setSearchParams({});
+    setSearchParams({}, { replace: true });
   };
 
   const toggleCategory = (catId: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(catId) ? prev.filter(c => c !== catId) : [...prev, catId]
-    );
+    updateParams((next) => {
+      const current = next.getAll('categoria');
+      next.delete('categoria');
+      if (current.includes(catId)) {
+        current.filter((c) => c !== catId).forEach((c) => next.append('categoria', c));
+      } else {
+        [...current, catId].forEach((c) => next.append('categoria', c));
+      }
+    });
   };
 
   const toggleBrand = (brand: string) => {
-    setSelectedBrands(prev => 
-      prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
-    );
+    updateParams((next) => {
+      const current = next.getAll('marca');
+      next.delete('marca');
+      if (current.includes(brand)) {
+        current.filter((b) => b !== brand).forEach((b) => next.append('marca', b));
+      } else {
+        [...current, brand].forEach((b) => next.append('marca', b));
+      }
+    });
   };
 
   /* ================================================================
@@ -296,7 +312,12 @@ export default function Catalogo() {
         <input 
           type="checkbox" 
           checked={inStockOnly}
-          onChange={(e) => setInStockOnly(e.target.checked)}
+          onChange={(e) =>
+            updateParams((next) => {
+              if (e.target.checked) next.set('stock', '1');
+              else next.delete('stock');
+            })
+          }
           className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary/20 transition-colors cursor-pointer"
         />
         <span className="text-sm font-medium text-secondary group-hover:text-primary transition-colors">
@@ -411,7 +432,10 @@ export default function Catalogo() {
               <button
                 key={idx}
                 onClick={() =>
-                  setSelectedPriceRange(selectedPriceRange === idx ? null : idx)
+                  updateParams((next) => {
+                    if (selectedPriceRange === idx) next.delete('precio');
+                    else next.set('precio', String(idx));
+                  })
                 }
                 className={`
                   w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
@@ -483,7 +507,12 @@ export default function Catalogo() {
           <div className="hidden md:flex items-center gap-2">
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortKey)}
+              onChange={(e) =>
+                updateParams((next) => {
+                  if (e.target.value === 'relevancia') next.delete('orden');
+                  else next.set('orden', e.target.value);
+                })
+              }
               className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-secondary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer appearance-none pr-8"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
@@ -615,7 +644,12 @@ export default function Catalogo() {
                 {SORT_OPTIONS.map((opt) => (
                   <button
                     key={opt.key}
-                    onClick={() => setSortBy(opt.key)}
+                    onClick={() =>
+                      updateParams((next) => {
+                        if (opt.key === 'relevancia') next.delete('orden');
+                        else next.set('orden', opt.key);
+                      })
+                    }
                     className={`
                       w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
                       ${
